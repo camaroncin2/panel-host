@@ -1,0 +1,64 @@
+:root {
+  --bg: #eef2f5;
+  --surface: #ffffff;
+  --surface-weak: #fbfcfd;
+  --surface-strong: #f6f8fa;
+  --text: #46515b;
+  --text-strong: #121820;
+  --muted: #71808c;
+  --line: #dde4ea;
+  --line-strong: #c8d3dd;
+  --accent: #3155a6;
+  --accent-2: #2e7d6d;
+  --success: #2e7d6d;
+  --warning: #c48526;
+  --danger: #b84549;
+  --selected-bg: #f8fbff;
+  --button-blue: #edf3ff;
+  --button-red: #fff1f1;
+  --shadow-soft: 0 18px 46px rgba(28, 42, 56, 0.06);
+  --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+
+  color: var(--text);
+  background: var(--bg);
+  font-family: var(--sans);
+  font-size: 15px;
+  font-synthesis: none;
+  line-height: 1.45;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  overflow: hidden;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 3px solid rgba(49, 85, 166, 0.28);
+  outline-offset: 2px;
+}
+
+::selection {
+  color: #ffffff;
+  background: var(--accent);
+}
