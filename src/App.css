@@ -238,6 +238,10 @@
   gap: 6px;
 }
 
+.mobile-section-select {
+  display: none;
+}
+
 .main-nav a,
 .main-nav button,
 .host-button,
@@ -273,6 +277,48 @@
 .main-nav button:hover {
   color: var(--text-strong);
   background: var(--surface);
+}
+
+.mobile-section-select {
+  position: relative;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text-strong);
+  background: var(--surface);
+}
+
+.mobile-section-select span {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.mobile-section-select strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobile-section-select select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.mobile-section-select > svg {
+  flex: 0 0 auto;
+  color: var(--muted);
+  pointer-events: none;
 }
 
 .host-switcher {
@@ -2014,6 +2060,15 @@ pre code {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .mobile-section-select {
+    display: flex;
+    grid-column: 1 / -1;
+  }
+
+  .main-nav button {
+    display: none;
+  }
+
   .host-switcher,
   .metrics-grid {
     grid-template-columns: 1fr;
@@ -2117,10 +2172,6 @@ pre code {
 }
 
 @media (max-width: 420px) {
-  .main-nav {
-    grid-template-columns: 1fr;
-  }
-
   .topbar-actions {
     grid-template-columns: 1fr 1fr;
   }

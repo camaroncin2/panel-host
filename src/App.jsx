@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   Activity,
   Box,
+  ChevronDown,
   CirclePause,
   Database,
   FileArchive,
@@ -352,6 +353,8 @@ function App() {
   const visibleNodes = hostGroups.filter((group) =>
     group.name.toLowerCase().includes(nodeSearch.trim().toLowerCase()),
   )
+  const activeSectionData = sections.find(([id]) => id === activeSection) ?? sections[0]
+  const ActiveSectionIcon = activeSectionData[1]
 
   function selectHost(hostId) {
     const nextHost = hostGroups.find((group) => group.id === hostId)
@@ -394,6 +397,25 @@ function App() {
         </div>
 
         <nav className="main-nav" aria-label="Secciones">
+          <label className="mobile-section-select">
+            <span>
+              <ActiveSectionIcon size={18} />
+              <strong>{activeSectionData[2]}</strong>
+            </span>
+            <select
+              aria-label="Cambiar seccion"
+              value={activeSection}
+              onChange={(event) => setActiveSection(event.target.value)}
+            >
+              {sections.map(([id, , label]) => (
+                <option key={id} value={id}>
+                  {label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown size={18} />
+          </label>
+
           {sections.map(([id, Icon, label]) => (
             <button
               className={classNames(activeSection === id && 'active')}
