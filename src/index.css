@@ -62,3 +62,9 @@ input:focus-visible {
   color: #ffffff;
   background: var(--accent);
 }
+
+@media (max-width: 1120px) {
+  body {
+    overflow: auto;
+  }
+}
