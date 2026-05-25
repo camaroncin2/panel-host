@@ -153,11 +153,11 @@ function LoginScreen({ error, form, isLoading, onChange, onSubmit }) {
             Usuario
             <input
               autoComplete="username"
-              name="username"
+              name="identifier"
               onChange={onChange}
               placeholder="Usuario"
               required
-              value={form.username}
+              value={form.identifier}
             />
           </label>
           <label>
@@ -185,7 +185,7 @@ function LoginScreen({ error, form, isLoading, onChange, onSubmit }) {
 function App() {
   const [authStatus, setAuthStatus] = useState('checking')
   const [authUser, setAuthUser] = useState(null)
-  const [loginForm, setLoginForm] = useState({ username: '', password: '' })
+  const [loginForm, setLoginForm] = useState({ identifier: '', password: '' })
   const [loginError, setLoginError] = useState('')
   const [isLoggingIn, setIsLoggingIn] = useState(false)
   const [hostGroups, setHostGroups] = useState(emptyGroups)
@@ -212,7 +212,7 @@ function App() {
 
     async function checkSession() {
       try {
-        const response = await fetch('/api/auth/session')
+        const response = await fetch('/api/auth/session', { credentials: 'include' })
         const data = await response.json()
 
         if (!isMounted) return
@@ -236,7 +236,12 @@ function App() {
 
     async function loadPanelState() {
       try {
-        const response = await fetch('/api/panel/state')
+        const response = await fetch('/api/panel/state', { credentials: 'include' })
+        if (response.status === 401) {
+          setAuthUser(null)
+          setAuthStatus('unauthenticated')
+          return
+        }
         if (!response.ok) throw new Error('No se pudo cargar el estado')
         const data = await response.json()
         const nextGroups = data.hosts?.length ? data.hosts : emptyGroups
@@ -284,19 +289,20 @@ function App() {
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(loginForm),
       })
       const data = await response.json().catch(() => ({}))
 
-      if (!response.ok || !data.authenticated) {
+      if (!response.ok || !data.user) {
         setLoginError(data.error ?? 'No se pudo iniciar sesion.')
         return
       }
 
       setAuthUser(data.user)
       setAuthStatus('authenticated')
-      setLoginForm({ username: '', password: '' })
+      setLoginForm({ identifier: '', password: '' })
     } catch {
       setLoginError('No se pudo conectar con el servicio de autenticacion.')
     } finally {
@@ -305,7 +311,7 @@ function App() {
   }
 
   async function logout() {
-    await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {})
     setAuthUser(null)
     setAuthStatus('unauthenticated')
     setHostGroups(emptyGroups)

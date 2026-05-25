@@ -240,10 +240,11 @@ function localPanelApi() {
         }
 
         try {
-          const { username, password } = await readJsonBody(request)
+          const { identifier, username, password } = await readJsonBody(request)
           const authConfig = getAuthConfig()
+          const submittedIdentifier = identifier ?? username
 
-          if (username !== authConfig.username || password !== authConfig.password) {
+          if (submittedIdentifier !== authConfig.username || password !== authConfig.password) {
             sendJson(response, 401, { error: 'Credenciales incorrectas' })
             return
           }
@@ -253,7 +254,7 @@ function localPanelApi() {
             200,
             {
               authenticated: true,
-              user: { name: username },
+              user: { name: submittedIdentifier },
               mode: authConfig.isDevelopmentFallback ? 'development' : 'configured',
             },
             {
