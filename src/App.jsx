@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react'
 import {
   Activity,
   Box,
@@ -71,7 +71,7 @@ function formatValue(value, suffix = '') {
   return value === null || value === undefined ? '-' : `${value}${suffix}`
 }
 
-function Metric({ icon: Icon, label, value, detail }) {
+const Metric = memo(function Metric({ icon: Icon, label, value, detail }) {
   return (
     <article className="metric">
       <div className="metric-icon">
@@ -84,9 +84,9 @@ function Metric({ icon: Icon, label, value, detail }) {
       </div>
     </article>
   )
-}
+})
 
-function StatusPill({ status }) {
+const StatusPill = memo(function StatusPill({ status }) {
   const labels = {
     detected: 'Detectado',
     online: 'Online',
@@ -95,9 +95,9 @@ function StatusPill({ status }) {
   }
 
   return <span className={classNames('status-pill', status ?? 'idle')}>{labels[status] ?? 'Sin seleccion'}</span>
-}
+})
 
-function ServerPowerState({ status }) {
+const ServerPowerState = memo(function ServerPowerState({ status }) {
   const state =
     status === 'offline'
       ? { label: 'Apagado', className: 'off' }
@@ -113,9 +113,9 @@ function ServerPowerState({ status }) {
       {state.label}
     </span>
   )
-}
+})
 
-function EmptyState({ icon: Icon, title, body }) {
+const EmptyState = memo(function EmptyState({ icon: Icon, title, body }) {
   return (
     <div className="empty-state">
       <div>
@@ -125,9 +125,9 @@ function EmptyState({ icon: Icon, title, body }) {
       <span>{body}</span>
     </div>
   )
-}
+})
 
-function LoginScreen({ error, form, isLoading, onChange, onSubmit }) {
+const LoginScreen = memo(function LoginScreen({ error, form, isLoading, onChange, onSubmit }) {
   return (
     <main className="login-shell">
       <section className="login-card" aria-label="Acceso seguro">
@@ -181,7 +181,7 @@ function LoginScreen({ error, form, isLoading, onChange, onSubmit }) {
       </section>
     </main>
   )
-}
+})
 
 function App() {
   const [authStatus, setAuthStatus] = useState('checking')
@@ -203,6 +203,8 @@ function App() {
     if (savedTheme) return savedTheme
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
   })
+  const deferredFileSearch = useDeferredValue(fileSearch)
+  const deferredNodeSearch = useDeferredValue(nodeSearch)
 
   useEffect(() => {
     window.localStorage.setItem('panel-host-theme', theme)
@@ -277,12 +279,12 @@ function App() {
     }
   }, [authStatus])
 
-  function updateLoginForm(event) {
+  const updateLoginForm = useCallback((event) => {
     const { name, value } = event.target
     setLoginForm((currentForm) => ({ ...currentForm, [name]: value }))
-  }
+  }, [])
 
-  async function submitLogin(event) {
+  const submitLogin = useCallback(async (event) => {
     event.preventDefault()
     setLoginError('')
     setIsLoggingIn(true)
@@ -309,26 +311,34 @@ function App() {
     } finally {
       setIsLoggingIn(false)
     }
-  }
+  }, [loginForm])
 
-  async function logout() {
+  const logout = useCallback(async () => {
     await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {})
     setAuthUser(null)
     setAuthStatus('unauthenticated')
     setHostGroups(emptyGroups)
     setActiveServerId(null)
-  }
+  }, [])
 
-  const activeHost = hostGroups.find((group) => group.id === activeHostId) ?? hostGroups[0]
-  const activeServer =
-    activeHost.servers.find((serverItem) => serverItem.id === activeServerId) ?? null
-  const visibleFiles =
-    activeServer?.files
-      ?.filter((file) => file.name.toLowerCase().includes(fileSearch.trim().toLowerCase()))
-      .toSorted((firstFile, secondFile) => {
+  const activeHost = useMemo(
+    () => hostGroups.find((group) => group.id === activeHostId) ?? hostGroups[0],
+    [activeHostId, hostGroups],
+  )
+  const activeServer = useMemo(
+    () => activeHost.servers.find((serverItem) => serverItem.id === activeServerId) ?? null,
+    [activeHost, activeServerId],
+  )
+  const visibleFiles = useMemo(
+    () =>
+      activeServer?.files
+        ?.filter((file) => file.name.toLowerCase().includes(deferredFileSearch.trim().toLowerCase()))
+        .toSorted((firstFile, secondFile) => {
         if (firstFile.type !== secondFile.type) return firstFile.type === 'Carpeta' ? -1 : 1
         return firstFile.name.localeCompare(secondFile.name)
-      }) ?? []
+        }) ?? [],
+    [activeServer, deferredFileSearch],
+  )
 
   const totals = useMemo(() => {
     const allServers = hostGroups.flatMap((group) => group.servers)
@@ -350,26 +360,33 @@ function App() {
         .reverse(),
     [totals.allServers],
   )
-  const visibleNodes = hostGroups.filter((group) =>
-    group.name.toLowerCase().includes(nodeSearch.trim().toLowerCase()),
+  const visibleNodes = useMemo(
+    () =>
+      hostGroups.filter((group) =>
+        group.name.toLowerCase().includes(deferredNodeSearch.trim().toLowerCase()),
+      ),
+    [deferredNodeSearch, hostGroups],
   )
-  const activeSectionData = sections.find(([id]) => id === activeSection) ?? sections[0]
+  const activeSectionData = useMemo(
+    () => sections.find(([id]) => id === activeSection) ?? sections[0],
+    [activeSection],
+  )
   const ActiveSectionIcon = activeSectionData[1]
 
-  function selectHost(hostId) {
+  const selectHost = useCallback((hostId) => {
     const nextHost = hostGroups.find((group) => group.id === hostId)
     setActiveHostId(hostId)
-    setActiveServerId(nextHost.servers[0]?.id ?? null)
-    setSelectedUploadServers(nextHost.servers.slice(0, 2).map((serverItem) => serverItem.id))
-  }
+    setActiveServerId(nextHost?.servers[0]?.id ?? null)
+    setSelectedUploadServers(nextHost?.servers.slice(0, 2).map((serverItem) => serverItem.id) ?? [])
+  }, [hostGroups])
 
-  function toggleUploadServer(serverId) {
+  const toggleUploadServer = useCallback((serverId) => {
     setSelectedUploadServers((currentServers) =>
       currentServers.includes(serverId)
         ? currentServers.filter((currentServerId) => currentServerId !== serverId)
       : [...currentServers, serverId],
     )
-  }
+  }, [])
 
   if (authStatus !== 'authenticated') {
     return (

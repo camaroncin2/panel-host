@@ -666,6 +666,7 @@ input:disabled {
   border-radius: 8px;
   background: var(--surface-weak);
   overflow: hidden;
+  contain: layout paint;
 }
 
 .summary-heading {
@@ -1169,6 +1170,7 @@ input:disabled {
   background: var(--surface-weak);
   cursor: pointer;
   text-align: left;
+  contain: layout paint;
 }
 
 .server-row.selected {
@@ -1480,6 +1482,7 @@ meter {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
+  contain: layout paint;
 }
 
 .node-card-heading,
@@ -1696,6 +1699,7 @@ pre code {
   min-height: 48px;
   padding: 0 14px;
   border-bottom: 1px solid var(--line);
+  contain: layout paint;
 }
 
 .file-row strong,
@@ -2187,5 +2191,16 @@ pre code {
   .node-facts,
   .selected-resource-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }
