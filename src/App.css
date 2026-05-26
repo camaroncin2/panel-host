@@ -688,7 +688,7 @@ input:disabled {
   height: 100%;
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
-  gap: 16px;
+  gap: 10px;
   overflow: auto;
   overscroll-behavior: contain;
 }
@@ -1043,11 +1043,11 @@ input:disabled {
 
 .selected-server-card {
   display: grid;
-  grid-template-columns: minmax(170px, 0.8fr) minmax(260px, 1.2fr) minmax(280px, 1fr);
+  grid-template-columns: minmax(190px, 0.9fr) minmax(250px, 1fr) minmax(250px, 0.95fr);
   align-items: center;
   gap: 10px;
-  margin-top: 12px;
-  padding: 10px;
+  margin-top: 0;
+  padding: 8px 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface-weak);
@@ -1060,7 +1060,7 @@ input:disabled {
 .selected-server-card h3 {
   margin: 0;
   color: var(--text-strong);
-  font-size: 16px;
+  font-size: 15px;
   letter-spacing: 0;
 }
 
@@ -1069,7 +1069,7 @@ input:disabled {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin: 5px 0 1px;
+  margin: 3px 0 1px;
 }
 
 .power-state {
@@ -1123,7 +1123,7 @@ input:disabled {
 .selected-server-card p {
   margin: 0;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1142,8 +1142,8 @@ input:disabled {
 .selected-resource-grid div,
 .left-summary-grid article {
   display: grid;
-  gap: 3px;
-  padding: 8px;
+  gap: 2px;
+  padding: 7px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
@@ -1358,7 +1358,7 @@ input:disabled {
 }
 
 .power-actions.compact .action-button {
-  min-height: 34px;
+  min-height: 32px;
   min-width: 0;
   padding: 0 8px;
 }
@@ -1474,8 +1474,8 @@ meter {
 }
 
 .console-panel {
-  height: 100%;
-  min-height: 0;
+  height: min(100%, calc(100vh - 234px));
+  min-height: 420px;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   background: #0f1417;
