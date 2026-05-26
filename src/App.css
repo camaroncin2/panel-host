@@ -153,6 +153,8 @@
   --button-blue: #252930;
   --button-red: #2b2527;
   --shadow-soft: 0 22px 50px rgba(0, 0, 0, 0.34);
+  --scrollbar-thumb: rgba(174, 179, 186, 0.22);
+  --scrollbar-thumb-hover: rgba(174, 179, 186, 0.38);
 }
 
 .sidebar {

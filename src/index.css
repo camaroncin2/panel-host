@@ -17,6 +17,9 @@
   --button-blue: #edf3ff;
   --button-red: #fff1f1;
   --shadow-soft: 0 18px 46px rgba(28, 42, 56, 0.06);
+  --scrollbar-thumb: rgba(113, 128, 140, 0.28);
+  --scrollbar-thumb-hover: rgba(113, 128, 140, 0.48);
+  --scrollbar-track: transparent;
   --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
 
@@ -33,6 +36,32 @@
 
 * {
   box-sizing: border-box;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 html {
