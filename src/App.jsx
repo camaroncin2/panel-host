@@ -132,6 +132,93 @@ function getEditorLineClass(line, type) {
   return 'text'
 }
 
+function tokenizeJsonLine(line) {
+  const tokens = []
+  const pattern = /("(?:\\.|[^"\\])*")(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d+)?|[{}[\],:]/g
+  let cursor = 0
+  let match
+
+  while ((match = pattern.exec(line)) !== null) {
+    if (match.index > cursor) {
+      tokens.push({ value: line.slice(cursor, match.index), className: 'plain' })
+    }
+
+    const value = match[0]
+    const className = match[2]
+      ? 'key'
+      : value.startsWith('"')
+        ? 'string'
+        : /^(true|false|null)$/.test(value)
+          ? 'literal'
+          : /^[{}[\],:]$/.test(value)
+            ? 'punctuation'
+            : 'number'
+
+    tokens.push({ value, className })
+    cursor = pattern.lastIndex
+  }
+
+  if (cursor < line.length) {
+    tokens.push({ value: line.slice(cursor), className: 'plain' })
+  }
+
+  return tokens.length ? tokens : [{ value: line || ' ', className: 'plain' }]
+}
+
+function tokenizeKeyValueLine(line) {
+  const trimmedLine = line.trim()
+
+  if (!trimmedLine) return [{ value: ' ', className: 'plain' }]
+  if (trimmedLine.startsWith('#') || trimmedLine.startsWith('//')) return [{ value: line, className: 'comment' }]
+
+  const separatorIndex = line.search(/[=:]/)
+  if (separatorIndex === -1) return [{ value: line, className: 'plain' }]
+
+  const keyPart = line.slice(0, separatorIndex)
+  const separator = line.slice(separatorIndex, separatorIndex + 1)
+  const valuePart = line.slice(separatorIndex + 1)
+  const valueClass = /^(true|false|null)\b/i.test(valuePart.trim())
+    ? 'literal'
+    : /^-?\d+(\.\d+)?\b/.test(valuePart.trim())
+      ? 'number'
+      : 'string'
+
+  return [
+    { value: keyPart, className: 'key' },
+    { value: separator, className: 'operator' },
+    { value: valuePart || ' ', className: valueClass },
+  ]
+}
+
+function tokenizeLogLine(line) {
+  if (!line) return [{ value: ' ', className: 'plain' }]
+
+  const tokens = []
+  const pattern = /(\[[^\]]+\])|\b(ERROR|WARN|INFO|DEBUG)\b|(\[[^\]]*\/(?:ERROR|WARN|INFO|DEBUG)\])/gi
+  let cursor = 0
+  let match
+
+  while ((match = pattern.exec(line)) !== null) {
+    if (match.index > cursor) tokens.push({ value: line.slice(cursor, match.index), className: 'plain' })
+
+    const value = match[0]
+    const className = /ERROR|WARN/i.test(value) ? 'warning' : /\bINFO\b/i.test(value) ? 'literal' : 'context'
+    tokens.push({ value, className })
+    cursor = pattern.lastIndex
+  }
+
+  if (cursor < line.length) tokens.push({ value: line.slice(cursor), className: 'plain' })
+  return tokens
+}
+
+function getEditorLineTokens(line, type) {
+  if (type === 'json') return tokenizeJsonLine(line)
+  if (type === 'properties' || type === 'config') return tokenizeKeyValueLine(line)
+  if (type === 'log') return tokenizeLogLine(line)
+  if (type === 'script') return tokenizeKeyValueLine(line)
+  return [{ value: line || ' ', className: 'plain' }]
+}
+
 function EditorLinePreview({ content, type }) {
   const lines = content.split('\n')
 
@@ -140,7 +227,13 @@ function EditorLinePreview({ content, type }) {
       {lines.map((line, index) => (
         <div className={classNames('editor-preview-line', getEditorLineClass(line, type))} key={`${index}-${line}`}>
           <span>{index + 1}</span>
-          <code>{line || ' '}</code>
+          <code>
+            {getEditorLineTokens(line, type).map((token, tokenIndex) => (
+              <b className={token.className} key={`${tokenIndex}-${token.value}`}>
+                {token.value}
+              </b>
+            ))}
+          </code>
         </div>
       ))}
     </div>

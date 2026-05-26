@@ -2249,24 +2249,62 @@ pre code {
   white-space: pre;
 }
 
-.editor-preview-line.comment code {
+.editor-preview-line code b {
+  color: inherit;
+  font: inherit;
+}
+
+.editor-preview-line .plain {
   color: #a8a8a8;
 }
 
-.editor-preview-line.property code {
-  color: #a8a8a8;
+.editor-preview-line .key {
+  color: #ea185f;
 }
 
-.editor-preview-line.structure code {
-  color: #a8a8a8;
-}
-
-.editor-preview-line.warning code {
+.editor-preview-line .string {
   color: #c9557c;
 }
 
-.editor-preview-line.command code {
+.editor-preview-line .number {
   color: #a8a8a8;
+  font-weight: 800;
+}
+
+.editor-preview-line .literal {
+  color: #ea185f;
+  font-weight: 800;
+}
+
+.editor-preview-line .operator,
+.editor-preview-line .punctuation,
+.editor-preview-line .context {
+  color: #a8a8a8;
+  opacity: 0.72;
+}
+
+.editor-preview-line .comment {
+  color: #a8a8a8;
+  opacity: 0.62;
+}
+
+.editor-preview-line.comment code {
+  color: #a8a8a8;
+  opacity: 0.68;
+}
+
+.editor-preview-line.structure code {
+  color: #c9557c;
+}
+
+.editor-preview-line.warning code,
+.editor-preview-line .warning {
+  color: #c9557c;
+  font-weight: 800;
+}
+
+.editor-preview-line.command code {
+  color: #ea185f;
 }
 
 .file-editor-surface textarea {
