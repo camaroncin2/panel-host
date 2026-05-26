@@ -71,6 +71,52 @@ function formatValue(value, suffix = '') {
   return value === null || value === undefined ? '-' : `${value}${suffix}`
 }
 
+function getFileEditorMetadata(filePath = '') {
+  const fileName = filePath.split('/').pop() ?? ''
+  const extension = fileName.includes('.') ? fileName.split('.').pop().toLowerCase() : ''
+  const metadataByExtension = {
+    json: { label: 'JSON', className: 'json' },
+    properties: { label: 'Properties', className: 'properties' },
+    toml: { label: 'TOML', className: 'config' },
+    yml: { label: 'YAML', className: 'config' },
+    yaml: { label: 'YAML', className: 'config' },
+    log: { label: 'Log', className: 'log' },
+    txt: { label: 'Texto', className: 'text' },
+    bat: { label: 'Batch', className: 'script' },
+    sh: { label: 'Shell', className: 'script' },
+  }
+
+  return metadataByExtension[extension] ?? { label: extension ? extension.toUpperCase() : 'Texto', className: 'text' }
+}
+
+function getEditorLineClass(line, type) {
+  const trimmedLine = line.trim()
+
+  if (!trimmedLine) return 'empty'
+  if (trimmedLine.startsWith('#') || trimmedLine.startsWith('//')) return 'comment'
+  if (type === 'json' && /^[{}[\],]+$/.test(trimmedLine)) return 'structure'
+  if (type === 'log' && /\b(ERROR|WARN)\b/i.test(trimmedLine)) return 'warning'
+  if (type === 'script' && /^(@echo|set |cd |java|\.\/|#)!?/i.test(trimmedLine)) return 'command'
+  if (trimmedLine.includes('=')) return 'property'
+  if (trimmedLine.includes(':')) return 'property'
+  return 'text'
+}
+
+function EditorLinePreview({ content, type }) {
+  const lines = content.split('\n')
+
+  return (
+    <div className="editor-preview" aria-hidden="true">
+      {lines.map((line, index) => (
+        <div className={classNames('editor-preview-line', getEditorLineClass(line, type))} key={`${index}-${line}`}>
+          <span>{index + 1}</span>
+          <code>{line || ' '}</code>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 const Metric = memo(function Metric({ icon: Icon, label, value, detail }) {
   return (
     <article className="metric">
@@ -401,6 +447,11 @@ function App() {
     [currentFileEntries, deferredFileSearch],
   )
   const filePathSegments = currentFilePath ? currentFilePath.split('/').filter(Boolean) : []
+  const editorMetadata = useMemo(
+    () => getFileEditorMetadata(openedFile?.path),
+    [openedFile?.path],
+  )
+  const editorLineCount = editorDraft ? editorDraft.split('\n').length : 0
 
   const totals = useMemo(() => {
     const allServers = hostGroups.flatMap((group) => group.servers)
@@ -1066,7 +1117,11 @@ function App() {
                     <div>
                       <span>Archivo abierto</span>
                       <strong>{openedFile.path}</strong>
+                      <small>{editorLineCount} lineas</small>
                     </div>
+                    <span className={classNames('file-type-pill', editorMetadata.className)}>
+                      {editorMetadata.label}
+                    </span>
                     <div>
                       <button className="soft-button" type="button" onClick={() => setOpenedFile(null)}>
                         Cerrar
@@ -1081,12 +1136,19 @@ function App() {
                       </button>
                     </div>
                   </div>
-                  <textarea
-                    disabled={openedFile.isLoading}
-                    value={editorDraft}
-                    onChange={(event) => setEditorDraft(event.target.value)}
-                    spellCheck="false"
-                  />
+                  <div
+                    className={classNames('file-editor-surface', editorMetadata.className)}
+                    style={{ '--editor-textarea-height': `${Math.max(editorLineCount * 20 + 28, 260)}px` }}
+                  >
+                    <EditorLinePreview content={editorDraft} type={editorMetadata.className} />
+                    <textarea
+                      disabled={openedFile.isLoading}
+                      value={editorDraft}
+                      onChange={(event) => setEditorDraft(event.target.value)}
+                      spellCheck="false"
+                      aria-label={`Editar ${openedFile.path}`}
+                    />
+                  </div>
                 </section>
               </div>
             )}
