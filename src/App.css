@@ -1861,11 +1861,28 @@ pre code {
   color: var(--muted);
 }
 
-.file-editor-panel {
+.file-editor-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
   display: grid;
-  min-height: 320px;
-  border-top: 1px solid var(--line);
+  place-items: center;
+  padding: 28px;
+  background: rgba(10, 12, 14, 0.62);
+  backdrop-filter: blur(8px);
+}
+
+.file-editor-modal {
+  width: min(980px, calc(100vw - 48px));
+  height: min(720px, calc(100vh - 56px));
+  min-height: 420px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  border: 1px solid var(--line);
+  border-radius: 8px;
   background: var(--surface-weak);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.38);
+  overflow: hidden;
 }
 
 .file-editor-header {
@@ -1900,10 +1917,11 @@ pre code {
   gap: 8px;
 }
 
-.file-editor-panel textarea {
+.file-editor-modal textarea {
   width: 100%;
-  min-height: 260px;
-  resize: vertical;
+  height: 100%;
+  min-height: 0;
+  resize: none;
   padding: 14px;
   border: 0;
   outline: 0;
@@ -2348,6 +2366,26 @@ pre code {
 
   .file-row strong {
     white-space: normal;
+  }
+
+  .file-editor-overlay {
+    padding: 12px;
+  }
+
+  .file-editor-modal {
+    width: calc(100vw - 24px);
+    height: calc(100vh - 24px);
+    min-height: 0;
+  }
+
+  .file-editor-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .file-editor-header > div:last-child {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 }
 

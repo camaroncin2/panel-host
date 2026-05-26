@@ -1056,36 +1056,39 @@ function App() {
                     body="Selecciona un servidor conectado."
                   />
                 )}
-                {openedFile && (
-                  <section className="file-editor-panel" aria-label="Editor de archivo">
-                    <div className="file-editor-header">
-                      <div>
-                        <span>Archivo abierto</span>
-                        <strong>{openedFile.path}</strong>
-                      </div>
-                      <div>
-                        <button className="soft-button" type="button" onClick={() => setOpenedFile(null)}>
-                          Cerrar
-                        </button>
-                        <button
-                          className="soft-button"
-                          type="button"
-                          disabled={openedFile.isLoading || isSavingFile}
-                          onClick={saveOpenedFile}
-                        >
-                          {isSavingFile ? 'Guardando' : 'Guardar'}
-                        </button>
-                      </div>
-                    </div>
-                    <textarea
-                      disabled={openedFile.isLoading}
-                      value={editorDraft}
-                      onChange={(event) => setEditorDraft(event.target.value)}
-                      spellCheck="false"
-                    />
-                  </section>
-                )}
               </section>
+            )}
+
+            {activeSection === 'files' && openedFile && (
+              <div className="file-editor-overlay" role="presentation">
+                <section className="file-editor-modal" aria-label="Editor de archivo" role="dialog" aria-modal="true">
+                  <div className="file-editor-header">
+                    <div>
+                      <span>Archivo abierto</span>
+                      <strong>{openedFile.path}</strong>
+                    </div>
+                    <div>
+                      <button className="soft-button" type="button" onClick={() => setOpenedFile(null)}>
+                        Cerrar
+                      </button>
+                      <button
+                        className="soft-button"
+                        type="button"
+                        disabled={openedFile.isLoading || isSavingFile}
+                        onClick={saveOpenedFile}
+                      >
+                        {isSavingFile ? 'Guardando' : 'Guardar'}
+                      </button>
+                    </div>
+                  </div>
+                  <textarea
+                    disabled={openedFile.isLoading}
+                    value={editorDraft}
+                    onChange={(event) => setEditorDraft(event.target.value)}
+                    spellCheck="false"
+                  />
+                </section>
+              </div>
             )}
 
             {activeSection === 'database' && (
