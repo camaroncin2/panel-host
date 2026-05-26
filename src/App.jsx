@@ -725,61 +725,63 @@ function App() {
               </button>
             </div>
 
-            <section className="bulk-upload-panel" aria-label="Subida multiple">
-              <div className="bulk-upload-heading">
-                <FolderUp size={17} />
-                <div>
-                  <strong>Subida multiple</strong>
-                  <span>{selectedUploadServers.length} servidores seleccionados</span>
+            {activeSection === 'files' && (
+              <section className="bulk-upload-panel" aria-label="Subida multiple">
+                <div className="bulk-upload-heading">
+                  <FolderUp size={17} />
+                  <div>
+                    <strong>Subida multiple</strong>
+                    <span>{selectedUploadServers.length} servidores seleccionados</span>
+                  </div>
                 </div>
-              </div>
 
-              <div className="upload-pickers">
-                <label className="upload-picker-card">
-                  <input type="file" />
-                  <FileArchive size={16} />
-                  <span>Archivo</span>
-                  <strong>Seleccionar</strong>
-                </label>
-                <label className="upload-picker-card">
-                  <input directory="" type="file" webkitdirectory="" />
-                  <Folder size={16} />
-                  <span>Carpeta</span>
-                  <strong>Seleccionar</strong>
-                </label>
-              </div>
-
-              <label className="destination-input">
-                Ruta destino
-                <select
-                  value={uploadTargetPath}
-                  onChange={(event) => setUploadTargetPath(event.target.value)}
-                >
-                  {uploadDestinations.map((destination) => (
-                    <option key={destination} value={destination}>
-                      {destination}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <div className="upload-server-list">
-                {activeHost.servers.map((serverItem) => (
-                  <label key={serverItem.id}>
-                    <input
-                      checked={selectedUploadServers.includes(serverItem.id)}
-                      onChange={() => toggleUploadServer(serverItem.id)}
-                      type="checkbox"
-                    />
-                    <span>{serverItem.name}</span>
+                <div className="upload-pickers">
+                  <label className="upload-picker-card">
+                    <input type="file" />
+                    <FileArchive size={16} />
+                    <span>Archivo</span>
+                    <strong>Seleccionar</strong>
                   </label>
-                ))}
-              </div>
+                  <label className="upload-picker-card">
+                    <input directory="" type="file" webkitdirectory="" />
+                    <Folder size={16} />
+                    <span>Carpeta</span>
+                    <strong>Seleccionar</strong>
+                  </label>
+                </div>
 
-              <button className="soft-button upload-action" disabled={!selectedUploadServers.length} type="button">
-                Preparar subida
-              </button>
-            </section>
+                <label className="destination-input">
+                  Ruta destino
+                  <select
+                    value={uploadTargetPath}
+                    onChange={(event) => setUploadTargetPath(event.target.value)}
+                  >
+                    {uploadDestinations.map((destination) => (
+                      <option key={destination} value={destination}>
+                        {destination}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <div className="upload-server-list">
+                  {activeHost.servers.map((serverItem) => (
+                    <label key={serverItem.id}>
+                      <input
+                        checked={selectedUploadServers.includes(serverItem.id)}
+                        onChange={() => toggleUploadServer(serverItem.id)}
+                        type="checkbox"
+                      />
+                      <span>{serverItem.name}</span>
+                    </label>
+                  ))}
+                </div>
+
+                <button className="soft-button upload-action" disabled={!selectedUploadServers.length} type="button">
+                  Preparar subida
+                </button>
+              </section>
+            )}
 
             <div className="server-list">
               {activeHost.servers.length === 0 ? (
