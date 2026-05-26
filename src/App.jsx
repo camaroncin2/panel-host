@@ -928,7 +928,7 @@ function App() {
         {!['summary', 'nodes'].includes(activeSection) && (
         <section className={classNames('dashboard-grid', activeSection !== 'files' && 'single-detail')} id={activeSection}>
           {activeSection === 'files' && (
-          <div className="server-panel">
+          <div className="server-panel files-server-panel">
             <div className="panel-heading">
               <div>
                 <span className="section-label">Servidores en {activeHost.name}</span>

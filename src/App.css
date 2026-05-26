@@ -900,32 +900,39 @@ input:disabled {
 
 .bulk-upload-panel {
   display: grid;
-  gap: 10px;
-  margin-bottom: 16px;
-  padding: 12px;
+  gap: 12px;
+  margin-bottom: 0;
+  padding: 14px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: var(--surface-weak);
+  background:
+    linear-gradient(180deg, rgba(201, 85, 124, 0.08), rgba(54, 54, 54, 0.18)),
+    var(--surface-weak);
   overflow: hidden;
 }
 
 .bulk-upload-heading {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
+  padding-bottom: 2px;
 }
 
 .bulk-upload-heading svg {
   color: var(--accent);
+  flex: 0 0 auto;
 }
 
 .bulk-upload-heading div {
+  min-width: 0;
   display: grid;
   gap: 1px;
 }
 
 .bulk-upload-heading strong {
   color: var(--text-strong);
+  font-size: 14px;
+  line-height: 1.15;
 }
 
 .bulk-upload-heading span,
@@ -938,7 +945,7 @@ input:disabled {
 .upload-pickers {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 10px;
 }
 
 .upload-picker-card,
@@ -948,20 +955,25 @@ input:disabled {
 }
 
 .upload-picker-card {
-  min-height: 72px;
+  min-height: 68px;
   place-items: center;
-  padding: 10px 8px;
-  border: 1px dashed var(--line-strong);
+  padding: 11px 8px;
+  border: 1px solid rgba(201, 85, 124, 0.32);
   border-radius: 8px;
   color: var(--muted);
   background: var(--surface);
   cursor: pointer;
   text-align: center;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease;
 }
 
 .upload-picker-card:hover {
   border-color: var(--accent);
   color: var(--text-strong);
+  background: rgba(234, 24, 95, 0.1);
 }
 
 .upload-picker-card input {
@@ -1003,8 +1015,9 @@ input:disabled {
 
 .upload-server-list {
   display: grid;
-  gap: 6px;
-  max-height: 92px;
+  gap: 5px;
+  max-height: 118px;
+  padding: 4px 2px 4px 0;
   overflow: auto;
   overscroll-behavior: contain;
 }
@@ -1013,9 +1026,18 @@ input:disabled {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-height: 28px;
+  min-height: 30px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
   color: var(--text);
   font-size: 13px;
+}
+
+.upload-server-list label:has(input:checked) {
+  border-color: rgba(234, 24, 95, 0.32);
+  background: rgba(234, 24, 95, 0.08);
+  color: var(--text-strong);
 }
 
 .upload-server-list input {
@@ -1041,6 +1063,24 @@ input:disabled {
   align-self: stretch;
   overflow: auto;
   overscroll-behavior: contain;
+}
+
+.files-server-panel {
+  height: auto;
+  max-height: 100%;
+  align-self: start;
+  display: grid;
+  gap: 14px;
+}
+
+.files-server-panel .panel-heading {
+  margin-bottom: 0;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.files-server-panel .soft-button {
+  min-height: 36px;
 }
 
 .selected-server-card {
