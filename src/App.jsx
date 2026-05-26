@@ -808,7 +808,7 @@ function App() {
           </div>
           )}
 
-          <section className="right-panel" aria-label="Detalle del servidor seleccionado">
+          <section className={classNames('right-panel', activeSection !== 'console' && 'content-only')} aria-label="Detalle del servidor seleccionado">
             {activeSection === 'console' && (
             <section className="tool-panel console-panel" id="console">
                 <div className="terminal-header">
@@ -938,44 +938,46 @@ function App() {
               </section>
             )}
 
-            <section className="selected-server-card" aria-label="Servidor seleccionado">
-              <div>
-                <StatusPill status={activeServer?.status} />
-                <div className="selected-title-row">
-                  <h3>{activeServer?.name ?? 'Selecciona un servidor'}</h3>
-                  <ServerPowerState status={activeServer?.status} />
-                </div>
-                <p>{activeServer?.address ?? 'No hay servidor activo en este servicio.'}</p>
-              </div>
-              <div className="selected-resource-grid">
+            {activeSection === 'console' && (
+              <section className="selected-server-card" aria-label="Servidor seleccionado">
                 <div>
-                  <span>CPU</span>
-                  <strong>{formatValue(activeServer?.cpu, '%')}</strong>
+                  <StatusPill status={activeServer?.status} />
+                  <div className="selected-title-row">
+                    <h3>{activeServer?.name ?? 'Selecciona un servidor'}</h3>
+                    <ServerPowerState status={activeServer?.status} />
+                  </div>
+                  <p>{activeServer?.address ?? 'No hay servidor activo en este servicio.'}</p>
                 </div>
-                <div>
-                  <span>RAM</span>
-                  <strong>{formatValue(activeServer?.ram, '%')}</strong>
+                <div className="selected-resource-grid">
+                  <div>
+                    <span>CPU</span>
+                    <strong>{formatValue(activeServer?.cpu, '%')}</strong>
+                  </div>
+                  <div>
+                    <span>RAM</span>
+                    <strong>{formatValue(activeServer?.ram, '%')}</strong>
+                  </div>
+                  <div>
+                    <span>Jugadores</span>
+                    <strong>{activeServer ? `${activeServer.playersOnline}/${activeServer.playersLimit || '-'}` : '-'}</strong>
+                  </div>
                 </div>
-                <div>
-                  <span>Jugadores</span>
-                  <strong>{activeServer ? `${activeServer.playersOnline}/${activeServer.playersLimit || '-'}` : '-'}</strong>
+                <div className="power-actions compact" aria-label="Controles de energia">
+                  <button className="action-button start" type="button" disabled={!activeServer}>
+                    <Play size={16} />
+                    Iniciar
+                  </button>
+                  <button className="action-button restart" type="button" disabled={!activeServer}>
+                    <RefreshCw size={16} />
+                    Reiniciar
+                  </button>
+                  <button className="action-button stop" type="button" disabled={!activeServer}>
+                    <Square size={15} />
+                    Detener
+                  </button>
                 </div>
-              </div>
-              <div className="power-actions compact" aria-label="Controles de energia">
-                <button className="action-button start" type="button" disabled={!activeServer}>
-                  <Play size={16} />
-                  Iniciar
-                </button>
-                <button className="action-button restart" type="button" disabled={!activeServer}>
-                  <RefreshCw size={16} />
-                  Reiniciar
-                </button>
-                <button className="action-button stop" type="button" disabled={!activeServer}>
-                  <Square size={15} />
-                  Detener
-                </button>
-              </div>
-            </section>
+              </section>
+            )}
           </section>
         </section>
         )}

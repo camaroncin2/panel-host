@@ -691,6 +691,10 @@ input:disabled {
   overscroll-behavior: contain;
 }
 
+.right-panel.content-only {
+  grid-template-rows: minmax(0, 1fr);
+}
+
 .summary-panel {
   height: calc(100vh - 116px);
   border: 1px solid var(--line);
