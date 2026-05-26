@@ -465,6 +465,30 @@ function App() {
           ))}
         </div>
 
+        <div className="sidebar-server-switcher">
+          <span className="section-label">Servidores</span>
+          {activeHost.servers.length === 0 ? (
+            <div className="sidebar-empty-note">
+              {isLoading ? 'Cargando servidores.' : 'Sin servidores conectados.'}
+            </div>
+          ) : (
+            activeHost.servers.map((serverItem) => (
+              <button
+                className={classNames('sidebar-server-button', serverItem.id === activeServer?.id && 'selected')}
+                key={serverItem.id}
+                onClick={() => setActiveServerId(serverItem.id)}
+                type="button"
+              >
+                <span className="server-dot" />
+                <span>
+                  <strong>{serverItem.name}</strong>
+                  <small>{serverItem.type}</small>
+                </span>
+              </button>
+            ))
+          )}
+        </div>
+
         <div className="sidebar-footer session-footer">
           <ShieldCheck size={18} />
           <span>{authUser?.name ?? 'Sesion activa'}</span>
@@ -711,7 +735,8 @@ function App() {
         )}
 
         {!['summary', 'nodes'].includes(activeSection) && (
-        <section className="dashboard-grid" id={activeSection}>
+        <section className={classNames('dashboard-grid', activeSection !== 'files' && 'single-detail')} id={activeSection}>
+          {activeSection === 'files' && (
           <div className="server-panel">
             <div className="panel-heading">
               <div>
@@ -725,7 +750,6 @@ function App() {
               </button>
             </div>
 
-            {activeSection === 'files' && (
               <section className="bulk-upload-panel" aria-label="Subida multiple">
                 <div className="bulk-upload-heading">
                   <FolderUp size={17} />
@@ -781,35 +805,8 @@ function App() {
                   Preparar subida
                 </button>
               </section>
-            )}
-
-            <div className="server-list">
-              {activeHost.servers.length === 0 ? (
-                <EmptyState
-                  icon={Server}
-                  title="Sin servidores conectados"
-                  body={isLoading ? 'Cargando servidores.' : 'Conecta la API para mostrar instancias.'}
-                />
-              ) : (
-                activeHost.servers.map((serverItem) => (
-                  <button
-                    className={classNames('server-row', serverItem.id === activeServer?.id && 'selected')}
-                    key={serverItem.id}
-                    onClick={() => setActiveServerId(serverItem.id)}
-                    type="button"
-                  >
-                    <div className="server-row-main">
-                      <span className="server-dot" />
-                      <div>
-                        <strong>{serverItem.name}</strong>
-                        <small>{serverItem.type}</small>
-                      </div>
-                    </div>
-                  </button>
-                ))
-              )}
-            </div>
           </div>
+          )}
 
           <section className="right-panel" aria-label="Detalle del servidor seleccionado">
             {activeSection === 'console' && (
