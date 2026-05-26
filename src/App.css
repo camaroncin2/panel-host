@@ -2299,20 +2299,20 @@ pre code {
 }
 
 .file-type-pill.json {
-  color: #c9557c;
+  color: #9cdcfe;
 }
 
 .file-type-pill.properties,
 .file-type-pill.config {
-  color: #c9557c;
+  color: #ce9178;
 }
 
 .file-type-pill.log {
-  color: #c9557c;
+  color: #dcdcaa;
 }
 
 .theme-dark .file-type-pill {
-  color: #a8a8a8;
+  color: #d4d4d4;
 }
 
 .file-editor-surface {
@@ -2320,8 +2320,8 @@ pre code {
   min-height: 0;
   overflow: auto;
   background:
-    linear-gradient(90deg, rgba(168, 168, 168, 0.03), transparent 120px),
-    #363636;
+    linear-gradient(90deg, rgba(133, 133, 133, 0.08), transparent 120px),
+    #1e1e1e;
 }
 
 .editor-preview {
@@ -2340,13 +2340,13 @@ pre code {
 
 .editor-preview-line span {
   padding-right: 12px;
-  color: #a8a8a8;
+  color: #858585;
   text-align: right;
   user-select: none;
 }
 
 .editor-preview-line code {
-  color: #a8a8a8;
+  color: #d4d4d4;
   white-space: pre;
 }
 
@@ -2356,56 +2356,56 @@ pre code {
 }
 
 .editor-preview-line .plain {
-  color: #a8a8a8;
+  color: #d4d4d4;
 }
 
 .editor-preview-line .key {
-  color: #ea185f;
+  color: #9cdcfe;
 }
 
 .editor-preview-line .string {
-  color: #c9557c;
+  color: #ce9178;
 }
 
 .editor-preview-line .number {
-  color: #a8a8a8;
+  color: #b5cea8;
   font-weight: 800;
 }
 
 .editor-preview-line .literal {
-  color: #ea185f;
+  color: #569cd6;
   font-weight: 800;
 }
 
 .editor-preview-line .operator,
 .editor-preview-line .punctuation,
 .editor-preview-line .context {
-  color: #a8a8a8;
-  opacity: 0.72;
+  color: #d4d4d4;
+  opacity: 0.78;
 }
 
 .editor-preview-line .comment {
-  color: #a8a8a8;
-  opacity: 0.62;
+  color: #6a9955;
+  opacity: 1;
 }
 
 .editor-preview-line.comment code {
-  color: #a8a8a8;
-  opacity: 0.68;
+  color: #6a9955;
+  opacity: 1;
 }
 
 .editor-preview-line.structure code {
-  color: #c9557c;
+  color: #d4d4d4;
 }
 
 .editor-preview-line.warning code,
 .editor-preview-line .warning {
-  color: #c9557c;
+  color: #f44747;
   font-weight: 800;
 }
 
 .editor-preview-line.command code {
-  color: #ea185f;
+  color: #dcdcaa;
 }
 
 .file-editor-surface textarea {
@@ -2420,7 +2420,7 @@ pre code {
   border: 0;
   outline: 0;
   color: transparent;
-  caret-color: #a8a8a8;
+  caret-color: #d4d4d4;
   background: transparent;
   font: 13px/1.55 var(--mono);
   white-space: pre;
@@ -2429,7 +2429,7 @@ pre code {
 
 .file-editor-surface textarea::selection {
   color: transparent;
-  background: rgba(234, 24, 95, 0.28);
+  background: rgba(38, 79, 120, 0.72);
 }
 
 .database-grid {
