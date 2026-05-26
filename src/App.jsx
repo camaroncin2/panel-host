@@ -1,4 +1,4 @@
-import { memo, useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react'
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Activity,
   Box,
@@ -205,6 +205,7 @@ function App() {
   const [openedFile, setOpenedFile] = useState(null)
   const [editorDraft, setEditorDraft] = useState('')
   const [isSavingFile, setIsSavingFile] = useState(false)
+  const consoleLogRef = useRef(null)
   const [theme, setTheme] = useState(() => {
     const savedTheme = window.localStorage.getItem('panel-host-theme')
     if (savedTheme) return savedTheme
@@ -333,6 +334,15 @@ function App() {
       isMounted = false
     }
   }, [activeSection, activeServer, currentFilePath])
+
+  useEffect(() => {
+    if (activeSection !== 'console') return
+
+    requestAnimationFrame(() => {
+      if (!consoleLogRef.current) return
+      consoleLogRef.current.scrollTop = consoleLogRef.current.scrollHeight
+    })
+  }, [activeSection, activeServer?.id, activeServer?.consoleLines])
 
   const updateLoginForm = useCallback((event) => {
     const { name, value } = event.target
@@ -952,7 +962,7 @@ function App() {
                   </button>
                 </div>
                 {activeServer?.consoleLines?.length ? (
-                  <pre>
+                  <pre ref={consoleLogRef}>
                     {activeServer.consoleLines.map((line, index) => (
                       <code key={`${line}-${index}`}>{line}</code>
                     ))}
