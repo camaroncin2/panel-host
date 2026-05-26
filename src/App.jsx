@@ -12,6 +12,7 @@ import {
   Gauge,
   HardDrive,
   History,
+  KeyRound,
   LayoutDashboard,
   LockKeyhole,
   LogOut,
@@ -23,9 +24,11 @@ import {
   Server,
   Settings,
   ShieldCheck,
+  SlidersHorizontal,
   Square,
   Sun,
   TerminalSquare,
+  UserCog,
   Users,
 } from 'lucide-react'
 import './App.css'
@@ -62,6 +65,33 @@ const sections = [
 ]
 
 const uploadDestinations = ['/mods', '/plugins', '/config', '/world', '/logs', '/']
+
+const permissionProfiles = [
+  {
+    id: 'owner',
+    name: 'Administrador',
+    detail: 'Acceso completo al panel',
+    permissions: ['Consola', 'Archivos', 'Base de datos', 'Nodos', 'Ajustes'],
+  },
+  {
+    id: 'operator',
+    name: 'Operador',
+    detail: 'Gestion operativa de servidores',
+    permissions: ['Consola', 'Archivos', 'Actividad'],
+  },
+  {
+    id: 'viewer',
+    name: 'Lectura',
+    detail: 'Consulta sin acciones criticas',
+    permissions: ['Resumen', 'Actividad'],
+  },
+]
+
+const panelUsers = [
+  { id: 'admin', name: 'admin', role: 'Administrador', status: 'Activo' },
+  { id: 'staff', name: 'staff', role: 'Operador', status: 'Pendiente' },
+  { id: 'viewer', name: 'viewer', role: 'Lectura', status: 'Pendiente' },
+]
 
 function classNames(...items) {
   return items.filter(Boolean).join(' ')
@@ -1191,12 +1221,124 @@ function App() {
             )}
 
             {activeSection === 'settings' && (
-              <section className="tool-panel content-panel">
-                <EmptyState
-                  icon={Settings}
-                  title="Ajustes pendientes"
-                  body="Aqui se configuraran opciones del panel."
-                />
+              <section className="tool-panel content-panel settings-panel" id="settings">
+                <div className="settings-header">
+                  <div>
+                    <span className="section-label">Configuracion del panel</span>
+                    <strong>Ajustes de seguridad y acceso</strong>
+                  </div>
+                  <button className="soft-button" type="button">
+                    <RefreshCw size={16} />
+                    Sincronizar
+                  </button>
+                </div>
+
+                <div className="settings-grid">
+                  <section className="settings-card sftp-card" aria-label="Conexion SFTP">
+                    <div className="settings-card-heading">
+                      <div className="settings-icon">
+                        <KeyRound size={19} />
+                      </div>
+                      <div>
+                        <span>SFTP</span>
+                        <strong>Conexion de archivos</strong>
+                      </div>
+                      <span className="settings-backend-pill">Backend</span>
+                    </div>
+
+                    <div className="sftp-fields">
+                      <div>
+                        <span>Servicio</span>
+                        <strong>{activeHost.name}</strong>
+                      </div>
+                      <div>
+                        <span>Servidor</span>
+                        <strong>{activeServer?.name ?? 'Sin seleccionar'}</strong>
+                      </div>
+                      <div>
+                        <span>Host</span>
+                        <strong>Pendiente</strong>
+                      </div>
+                      <div>
+                        <span>Puerto</span>
+                        <strong>Pendiente</strong>
+                      </div>
+                      <div>
+                        <span>Usuario</span>
+                        <strong>Pendiente</strong>
+                      </div>
+                      <div>
+                        <span>Ruta base</span>
+                        <strong>Pendiente</strong>
+                      </div>
+                    </div>
+
+                    <div className="settings-note">
+                      <ShieldCheck size={16} />
+                      <span>Los datos reales se cargaran desde el backend y no quedaran escritos en el frontend.</span>
+                    </div>
+
+                    <div className="settings-actions">
+                      <button className="soft-button" type="button" disabled>
+                        Probar conexion
+                      </button>
+                      <button className="soft-button" type="button" disabled>
+                        Guardar SFTP
+                      </button>
+                    </div>
+                  </section>
+
+                  <section className="settings-card permissions-card" aria-label="Permisos de usuarios">
+                    <div className="settings-card-heading">
+                      <div className="settings-icon">
+                        <UserCog size={19} />
+                      </div>
+                      <div>
+                        <span>Usuarios</span>
+                        <strong>Permisos del panel</strong>
+                      </div>
+                      <button className="soft-button" type="button" disabled>
+                        Agregar usuario
+                      </button>
+                    </div>
+
+                    <div className="permission-profiles">
+                      {permissionProfiles.map((profile) => (
+                        <article key={profile.id}>
+                          <div>
+                            <strong>{profile.name}</strong>
+                            <span>{profile.detail}</span>
+                          </div>
+                          <div>
+                            {profile.permissions.map((permission) => (
+                              <span key={permission}>{permission}</span>
+                            ))}
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+
+                    <div className="user-permission-table">
+                      <div className="user-permission-head">
+                        <span>Usuario</span>
+                        <span>Rol</span>
+                        <span>Estado</span>
+                        <span>Acceso</span>
+                      </div>
+                      {panelUsers.map((user) => (
+                        <div className="user-permission-row" key={user.id}>
+                          <strong>{user.name}</strong>
+                          <span>{user.role}</span>
+                          <span className={classNames('user-status', user.status === 'Activo' && 'active')}>{user.status}</span>
+                          <button className="soft-button" type="button" disabled>
+                            <SlidersHorizontal size={15} />
+                            Editar
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                </div>
               </section>
             )}
 

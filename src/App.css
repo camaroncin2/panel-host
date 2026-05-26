@@ -1536,6 +1536,228 @@ meter {
   padding: 16px;
 }
 
+.settings-panel {
+  padding: 16px;
+}
+
+.settings-header,
+.settings-card-heading,
+.settings-actions {
+  display: flex;
+  align-items: center;
+}
+
+.settings-header {
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.settings-header > div {
+  display: grid;
+  gap: 4px;
+}
+
+.settings-header strong {
+  color: var(--text-strong);
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(360px, 1.1fr);
+  gap: 16px;
+}
+
+.settings-card {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.settings-card-heading {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-card-heading > div:not(.settings-icon) {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  margin-right: auto;
+}
+
+.settings-card-heading span,
+.sftp-fields span,
+.permission-profiles span,
+.user-permission-table span,
+.settings-note {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.settings-card-heading strong,
+.sftp-fields strong,
+.permission-profiles strong,
+.user-permission-row strong {
+  color: var(--text-strong);
+}
+
+.settings-backend-pill {
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 9px;
+  border-radius: 999px;
+  color: var(--text-strong);
+  background: rgba(234, 24, 95, 0.12);
+  font-weight: 800;
+}
+
+.settings-icon {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  color: var(--accent);
+  background: rgba(234, 24, 95, 0.12);
+}
+
+.sftp-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.sftp-fields div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-weak);
+}
+
+.sftp-fields strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 12px;
+  border: 1px solid rgba(234, 24, 95, 0.22);
+  border-radius: 8px;
+  background: rgba(234, 24, 95, 0.08);
+}
+
+.settings-note svg {
+  flex: 0 0 auto;
+  color: var(--accent);
+}
+
+.settings-actions {
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.permission-profiles {
+  display: grid;
+  gap: 10px;
+}
+
+.permission-profiles article {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-weak);
+}
+
+.permission-profiles article > div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.permission-profiles article > div:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.permission-profiles article > div:last-child span {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  border-radius: 999px;
+  color: var(--text-strong);
+  background: rgba(234, 24, 95, 0.1);
+}
+
+.user-permission-table {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.user-permission-head,
+.user-permission-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(110px, 0.8fr) minmax(96px, 0.7fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px 12px;
+}
+
+.user-permission-head {
+  background: var(--surface-weak);
+}
+
+.user-permission-row + .user-permission-row {
+  border-top: 1px solid var(--line);
+}
+
+.user-permission-row strong,
+.user-permission-row span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-status {
+  width: max-content;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgba(168, 168, 168, 0.08);
+}
+
+.user-status.active {
+  color: var(--text-strong);
+  background: rgba(234, 24, 95, 0.14);
+}
+
 .nodes-toolbar {
   display: grid;
   grid-template-columns: minmax(180px, 1fr) minmax(220px, 360px) auto;
@@ -2252,6 +2474,10 @@ pre code {
     grid-template-columns: 1fr;
   }
 
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
   .node-facts {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
@@ -2266,6 +2492,7 @@ pre code {
   .server-hero,
   .panel-heading,
   .summary-heading,
+  .settings-header,
   .nodes-toolbar {
     align-items: stretch;
     flex-direction: column;
@@ -2312,6 +2539,53 @@ pre code {
 
   .nodes-toolbar {
     display: flex;
+  }
+
+  .settings-card-heading,
+  .settings-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .settings-card-heading {
+    align-items: flex-start;
+  }
+
+  .settings-card-heading .soft-button,
+  .settings-actions .soft-button {
+    width: 100%;
+  }
+
+  .sftp-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .user-permission-table {
+    gap: 0;
+    border: 0;
+    overflow: visible;
+  }
+
+  .user-permission-head {
+    display: none;
+  }
+
+  .user-permission-row {
+    grid-template-columns: 1fr;
+    gap: 7px;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface-weak);
+  }
+
+  .user-permission-row + .user-permission-row {
+    margin-top: 8px;
+    border-top: 1px solid var(--line);
+  }
+
+  .user-permission-row .soft-button {
+    width: 100%;
   }
 
   .node-search {
@@ -2442,12 +2716,15 @@ pre code {
 
   .server-panel,
   .summary-panel,
-  .nodes-panel {
+  .nodes-panel,
+  .settings-panel,
+  .settings-card {
     padding: 12px;
   }
 
   .panel-heading .soft-button,
   .summary-heading .soft-button,
+  .settings-header .soft-button,
   .nodes-toolbar .soft-button,
   .table-header .soft-button {
     width: 100%;
