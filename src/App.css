@@ -1749,6 +1749,51 @@ pre code {
   display: grid;
 }
 
+.file-browser-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+
+.file-browser-toolbar button {
+  min-width: max-content;
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--surface);
+  cursor: pointer;
+  font: inherit;
+}
+
+.file-browser-toolbar button:disabled {
+  opacity: 0.48;
+}
+
+.file-browser-toolbar button + button::before {
+  content: "/";
+  margin-right: 8px;
+  color: var(--muted);
+}
+
+.file-browser-toolbar span,
+.file-browser-error {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.file-browser-error {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(184, 69, 73, 0.08);
+}
+
 .file-table.compact {
   max-height: 410px;
   overflow: auto;
@@ -1761,8 +1806,18 @@ pre code {
   gap: 12px;
   min-height: 48px;
   padding: 0 14px;
+  border: 0;
   border-bottom: 1px solid var(--line);
   contain: layout paint;
+  color: var(--text);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.file-row:hover {
+  background: var(--surface);
 }
 
 .file-row strong,
@@ -1804,6 +1859,57 @@ pre code {
 .database-grid span,
 .activity-row small {
   color: var(--muted);
+}
+
+.file-editor-panel {
+  display: grid;
+  min-height: 320px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-weak);
+}
+
+.file-editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.file-editor-header > div:first-child {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.file-editor-header span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.file-editor-header strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-editor-header > div:last-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.file-editor-panel textarea {
+  width: 100%;
+  min-height: 260px;
+  resize: vertical;
+  padding: 14px;
+  border: 0;
+  outline: 0;
+  color: var(--text-strong);
+  background: var(--surface-weak);
+  font: 13px/1.55 var(--mono);
 }
 
 .database-grid {

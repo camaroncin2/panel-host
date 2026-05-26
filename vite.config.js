@@ -77,22 +77,45 @@ function formatBytes(bytes) {
   return `${(bytes / 1024 ** index).toFixed(index === 0 ? 0 : 1)} ${units[index]}`
 }
 
-async function readServerFiles(serverPath) {
+function getSafeRelativePath(relativePath = '') {
+  const normalizedPath = relativePath.replaceAll('\\', '/').replace(/^\/+/, '')
+  const parts = normalizedPath.split('/').filter(Boolean)
+
+  if (parts.some((part) => part === '..')) return null
+  return parts.join('/')
+}
+
+function resolveServerFilePath(rootPath, serverId, relativePath = '') {
+  const safeRelativePath = getSafeRelativePath(relativePath)
+  if (safeRelativePath === null) return null
+
+  const serverPath = path.resolve(rootPath, serverId)
+  const targetPath = path.resolve(serverPath, safeRelativePath)
+  const isInsideServer = targetPath === serverPath || targetPath.startsWith(`${serverPath}${path.sep}`)
+
+  if (!isInsideServer) return null
+  return { serverPath, targetPath, relativePath: safeRelativePath }
+}
+
+async function readServerFiles(serverPath, relativePath = '') {
   try {
-    const entries = await fs.readdir(serverPath, { withFileTypes: true })
+    const targetPath = path.join(serverPath, relativePath)
+    const entries = await fs.readdir(targetPath, { withFileTypes: true })
     const visibleEntries = entries
       .filter((entry) => !entry.name.startsWith('.'))
-      .slice(0, 30)
+      .slice(0, 80)
 
     return Promise.all(
       visibleEntries.map(async (entry) => {
-        const entryPath = path.join(serverPath, entry.name)
+        const entryPath = path.join(targetPath, entry.name)
         const stat = await fs.stat(entryPath)
         const size = entry.isDirectory() ? await getDirectorySize(entryPath) : stat.size
+        const entryRelativePath = relativePath ? `${relativePath}/${entry.name}` : entry.name
 
         return {
           name: entry.name,
           type: entry.isDirectory() ? 'Carpeta' : 'Archivo',
+          path: entryRelativePath.replaceAll('\\', '/'),
           size: formatBytes(size),
           updated: stat.mtime.toISOString(),
         }
@@ -101,6 +124,10 @@ async function readServerFiles(serverPath) {
   } catch {
     return []
   }
+}
+
+function getRequestUrl(request) {
+  return new URL(request.url, 'http://localhost')
 }
 
 function sanitizeLocalText(value, rootPath) {
@@ -275,6 +302,102 @@ function localPanelApi() {
         sendJson(response, 200, { authenticated: false }, {
           'Set-Cookie': `${sessionCookieName}=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0`,
         })
+      })
+
+      server.middlewares.use('/api/panel/files', async (request, response) => {
+        if (!isAuthenticated(request)) {
+          sendJson(response, 401, { error: 'Sesion requerida' })
+          return
+        }
+
+        if (request.method !== 'GET') {
+          sendJson(response, 405, { error: 'Metodo no permitido' })
+          return
+        }
+
+        const rootPath = process.env.PANEL_HOST_LOCAL_ROOT
+        const requestUrl = getRequestUrl(request)
+        const serverId = requestUrl.searchParams.get('server')
+        const relativePath = requestUrl.searchParams.get('path') ?? ''
+        const resolvedPath = rootPath && serverId ? resolveServerFilePath(rootPath, serverId, relativePath) : null
+
+        if (!resolvedPath || !(await pathExists(resolvedPath.targetPath))) {
+          sendJson(response, 404, { error: 'Ruta no encontrada' })
+          return
+        }
+
+        try {
+          const files = await readServerFiles(resolvedPath.serverPath, resolvedPath.relativePath)
+          sendJson(response, 200, { path: resolvedPath.relativePath, files })
+        } catch {
+          sendJson(response, 400, { error: 'No se pudo abrir la carpeta' })
+        }
+      })
+
+      server.middlewares.use('/api/panel/file', async (request, response) => {
+        if (!isAuthenticated(request)) {
+          sendJson(response, 401, { error: 'Sesion requerida' })
+          return
+        }
+
+        const rootPath = process.env.PANEL_HOST_LOCAL_ROOT
+
+        if (request.method === 'GET') {
+          const requestUrl = getRequestUrl(request)
+          const serverId = requestUrl.searchParams.get('server')
+          const relativePath = requestUrl.searchParams.get('path') ?? ''
+          const resolvedPath = rootPath && serverId ? resolveServerFilePath(rootPath, serverId, relativePath) : null
+
+          if (!resolvedPath || !(await pathExists(resolvedPath.targetPath))) {
+            sendJson(response, 404, { error: 'Archivo no encontrado' })
+            return
+          }
+
+          try {
+            const stat = await fs.stat(resolvedPath.targetPath)
+            if (stat.isDirectory() || stat.size > 1024 * 1024) {
+              sendJson(response, 400, { error: 'El archivo no se puede editar desde el panel' })
+              return
+            }
+
+            const content = await fs.readFile(resolvedPath.targetPath, 'utf8')
+            sendJson(response, 200, {
+              path: resolvedPath.relativePath,
+              name: path.basename(resolvedPath.targetPath),
+              content,
+              updated: stat.mtime.toISOString(),
+            })
+          } catch {
+            sendJson(response, 400, { error: 'No se pudo abrir el archivo' })
+          }
+          return
+        }
+
+        if (request.method === 'PUT') {
+          try {
+            const { server, path: relativePath, content } = await readJsonBody(request)
+            const resolvedPath = rootPath && server ? resolveServerFilePath(rootPath, server, relativePath) : null
+
+            if (!resolvedPath || !(await pathExists(resolvedPath.targetPath))) {
+              sendJson(response, 404, { error: 'Archivo no encontrado' })
+              return
+            }
+
+            const stat = await fs.stat(resolvedPath.targetPath)
+            if (stat.isDirectory() || typeof content !== 'string') {
+              sendJson(response, 400, { error: 'Contenido invalido' })
+              return
+            }
+
+            await fs.writeFile(resolvedPath.targetPath, content, 'utf8')
+            sendJson(response, 200, { saved: true, path: resolvedPath.relativePath })
+          } catch {
+            sendJson(response, 400, { error: 'No se pudo guardar el archivo' })
+          }
+          return
+        }
+
+        sendJson(response, 405, { error: 'Metodo no permitido' })
       })
 
       server.middlewares.use('/api/panel/state', async (request, response) => {

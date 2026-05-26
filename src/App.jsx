@@ -198,6 +198,13 @@ function App() {
   const [nodeSearch, setNodeSearch] = useState('')
   const [uploadTargetPath, setUploadTargetPath] = useState('/mods')
   const [selectedUploadServers, setSelectedUploadServers] = useState([])
+  const [currentFilePath, setCurrentFilePath] = useState('')
+  const [fileEntries, setFileEntries] = useState([])
+  const [isFileBrowserLoading, setIsFileBrowserLoading] = useState(false)
+  const [fileBrowserError, setFileBrowserError] = useState('')
+  const [openedFile, setOpenedFile] = useState(null)
+  const [editorDraft, setEditorDraft] = useState('')
+  const [isSavingFile, setIsSavingFile] = useState(false)
   const [theme, setTheme] = useState(() => {
     const savedTheme = window.localStorage.getItem('panel-host-theme')
     if (savedTheme) return savedTheme
@@ -205,6 +212,14 @@ function App() {
   })
   const deferredFileSearch = useDeferredValue(fileSearch)
   const deferredNodeSearch = useDeferredValue(nodeSearch)
+  const activeHost = useMemo(
+    () => hostGroups.find((group) => group.id === activeHostId) ?? hostGroups[0],
+    [activeHostId, hostGroups],
+  )
+  const activeServer = useMemo(
+    () => activeHost.servers.find((serverItem) => serverItem.id === activeServerId) ?? null,
+    [activeHost, activeServerId],
+  )
 
   useEffect(() => {
     window.localStorage.setItem('panel-host-theme', theme)
@@ -279,6 +294,46 @@ function App() {
     }
   }, [authStatus])
 
+  useEffect(() => {
+    if (activeSection !== 'files' || !activeServer) return undefined
+
+    let isMounted = true
+
+    async function loadFiles() {
+      if (!currentFilePath) return
+
+      setIsFileBrowserLoading(true)
+      setFileBrowserError('')
+
+      try {
+        const params = new URLSearchParams({ server: activeServer.id, path: currentFilePath })
+        const response = await fetch(`/api/panel/files?${params.toString()}`, { credentials: 'include' })
+        const data = await response.json().catch(() => ({}))
+
+        if (!isMounted) return
+        if (!response.ok) {
+          setFileEntries([])
+          setFileBrowserError(data.error ?? 'No se pudo abrir la carpeta.')
+          return
+        }
+
+        setFileEntries(data.files ?? [])
+      } catch {
+        if (isMounted) {
+          setFileEntries([])
+          setFileBrowserError('No se pudo conectar con el explorador de archivos.')
+        }
+      } finally {
+        if (isMounted) setIsFileBrowserLoading(false)
+      }
+    }
+
+    loadFiles()
+    return () => {
+      isMounted = false
+    }
+  }, [activeSection, activeServer, currentFilePath])
+
   const updateLoginForm = useCallback((event) => {
     const { name, value } = event.target
     setLoginForm((currentForm) => ({ ...currentForm, [name]: value }))
@@ -321,24 +376,21 @@ function App() {
     setActiveServerId(null)
   }, [])
 
-  const activeHost = useMemo(
-    () => hostGroups.find((group) => group.id === activeHostId) ?? hostGroups[0],
-    [activeHostId, hostGroups],
-  )
-  const activeServer = useMemo(
-    () => activeHost.servers.find((serverItem) => serverItem.id === activeServerId) ?? null,
-    [activeHost, activeServerId],
+  const currentFileEntries = useMemo(
+    () => (currentFilePath ? fileEntries : activeServer?.files ?? []),
+    [activeServer, currentFilePath, fileEntries],
   )
   const visibleFiles = useMemo(
     () =>
-      activeServer?.files
+      currentFileEntries
         ?.filter((file) => file.name.toLowerCase().includes(deferredFileSearch.trim().toLowerCase()))
         .toSorted((firstFile, secondFile) => {
         if (firstFile.type !== secondFile.type) return firstFile.type === 'Carpeta' ? -1 : 1
         return firstFile.name.localeCompare(secondFile.name)
         }) ?? [],
-    [activeServer, deferredFileSearch],
+    [currentFileEntries, deferredFileSearch],
   )
+  const filePathSegments = currentFilePath ? currentFilePath.split('/').filter(Boolean) : []
 
   const totals = useMemo(() => {
     const allServers = hostGroups.flatMap((group) => group.servers)
@@ -378,7 +430,21 @@ function App() {
     setActiveHostId(hostId)
     setActiveServerId(nextHost?.servers[0]?.id ?? null)
     setSelectedUploadServers(nextHost?.servers.slice(0, 2).map((serverItem) => serverItem.id) ?? [])
+    setCurrentFilePath('')
+    setFileEntries([])
+    setOpenedFile(null)
+    setEditorDraft('')
+    setFileBrowserError('')
   }, [hostGroups])
+
+  const selectServer = useCallback((serverId) => {
+    setActiveServerId(serverId)
+    setCurrentFilePath('')
+    setFileEntries([])
+    setOpenedFile(null)
+    setEditorDraft('')
+    setFileBrowserError('')
+  }, [])
 
   const toggleUploadServer = useCallback((serverId) => {
     setSelectedUploadServers((currentServers) =>
@@ -387,6 +453,70 @@ function App() {
       : [...currentServers, serverId],
     )
   }, [])
+
+  const openFolder = useCallback((folderPath) => {
+    setCurrentFilePath(folderPath)
+    setOpenedFile(null)
+    setEditorDraft('')
+  }, [])
+
+  const openFile = useCallback(async (file) => {
+    if (!activeServer) return
+
+    setFileBrowserError('')
+    setOpenedFile({ name: file.name, path: file.path, isLoading: true })
+    setEditorDraft('')
+
+    try {
+      const params = new URLSearchParams({ server: activeServer.id, path: file.path })
+      const response = await fetch(`/api/panel/file?${params.toString()}`, { credentials: 'include' })
+      const data = await response.json().catch(() => ({}))
+
+      if (!response.ok) {
+        setOpenedFile(null)
+        setFileBrowserError(data.error ?? 'No se pudo abrir el archivo.')
+        return
+      }
+
+      setOpenedFile({ name: data.name, path: data.path, updated: data.updated, isLoading: false })
+      setEditorDraft(data.content ?? '')
+    } catch {
+      setOpenedFile(null)
+      setFileBrowserError('No se pudo conectar con el editor de archivos.')
+    }
+  }, [activeServer])
+
+  const saveOpenedFile = useCallback(async () => {
+    if (!activeServer || !openedFile) return
+
+    setIsSavingFile(true)
+    setFileBrowserError('')
+
+    try {
+      const response = await fetch('/api/panel/file', {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          server: activeServer.id,
+          path: openedFile.path,
+          content: editorDraft,
+        }),
+      })
+      const data = await response.json().catch(() => ({}))
+
+      if (!response.ok) {
+        setFileBrowserError(data.error ?? 'No se pudo guardar el archivo.')
+        return
+      }
+
+      setOpenedFile((currentFile) => currentFile ? { ...currentFile, saved: true } : currentFile)
+    } catch {
+      setFileBrowserError('No se pudo conectar con el servicio de guardado.')
+    } finally {
+      setIsSavingFile(false)
+    }
+  }, [activeServer, editorDraft, openedFile])
 
   if (authStatus !== 'authenticated') {
     return (
@@ -476,7 +606,7 @@ function App() {
               <button
                 className={classNames('sidebar-server-button', serverItem.id === activeServer?.id && 'selected')}
                 key={serverItem.id}
-                onClick={() => setActiveServerId(serverItem.id)}
+                onClick={() => selectServer(serverItem.id)}
                 type="button"
               >
                 <span className="server-dot" />
@@ -597,7 +727,7 @@ function App() {
                           group.servers.some((item) => item.id === serverItem.id),
                         )
                         setActiveHostId(nextHost?.id ?? activeHostId)
-                        setActiveServerId(serverItem.id)
+                        selectServer(serverItem.id)
                         setActiveSection('console')
                       }}
                       type="button"
@@ -859,27 +989,55 @@ function App() {
                   </label>
                   <button className="soft-button" type="button" disabled={!activeServer}>Subir</button>
                 </div>
+                <div className="file-browser-toolbar" aria-label="Ruta actual">
+                  <button type="button" onClick={() => openFolder('')} disabled={!currentFilePath}>
+                    Raiz
+                  </button>
+                  {filePathSegments.map((segment, index) => {
+                    const segmentPath = filePathSegments.slice(0, index + 1).join('/')
+
+                    return (
+                      <button key={segmentPath} type="button" onClick={() => openFolder(segmentPath)}>
+                        {segment}
+                      </button>
+                    )
+                  })}
+                  {isFileBrowserLoading && <span>Cargando</span>}
+                </div>
+                {fileBrowserError && <div className="file-browser-error">{fileBrowserError}</div>}
                 {visibleFiles.length ? (
                   <div className="file-table">
                     {visibleFiles.map((file) => {
                       const Icon = file.type === 'Carpeta' ? Folder : file.name.endsWith('.properties') ? FileCode2 : FileArchive
+                      const filePath = file.path ?? file.name
 
                       return (
-                        <div className="file-row" key={file.name}>
+                        <button
+                          className="file-row"
+                          key={filePath}
+                          onClick={() => (file.type === 'Carpeta' ? openFolder(filePath) : openFile({ ...file, path: filePath }))}
+                          type="button"
+                        >
                           <Icon size={18} />
                           <strong>{file.name}</strong>
                           <span>{file.type}</span>
                           <span>{file.size}</span>
                           <small>{new Date(file.updated).toLocaleString()}</small>
-                        </div>
+                        </button>
                       )
                     })}
                   </div>
-                ) : activeServer?.files?.length ? (
+                ) : currentFileEntries.length ? (
                   <EmptyState
                     icon={Search}
                     title="Sin resultados"
                     body="No hay archivos que coincidan con la busqueda."
+                  />
+                ) : currentFilePath ? (
+                  <EmptyState
+                    icon={Folder}
+                    title="Carpeta vacia"
+                    body="No hay archivos visibles en esta ruta."
                   />
                 ) : (
                   <EmptyState
@@ -887,6 +1045,35 @@ function App() {
                     title="Sin archivos cargados"
                     body="Selecciona un servidor conectado."
                   />
+                )}
+                {openedFile && (
+                  <section className="file-editor-panel" aria-label="Editor de archivo">
+                    <div className="file-editor-header">
+                      <div>
+                        <span>Archivo abierto</span>
+                        <strong>{openedFile.path}</strong>
+                      </div>
+                      <div>
+                        <button className="soft-button" type="button" onClick={() => setOpenedFile(null)}>
+                          Cerrar
+                        </button>
+                        <button
+                          className="soft-button"
+                          type="button"
+                          disabled={openedFile.isLoading || isSavingFile}
+                          onClick={saveOpenedFile}
+                        >
+                          {isSavingFile ? 'Guardando' : 'Guardar'}
+                        </button>
+                      </div>
+                    </div>
+                    <textarea
+                      disabled={openedFile.isLoading}
+                      value={editorDraft}
+                      onChange={(event) => setEditorDraft(event.target.value)}
+                      spellCheck="false"
+                    />
+                  </section>
                 )}
               </section>
             )}
