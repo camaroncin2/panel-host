@@ -367,6 +367,7 @@ function App() {
   const [nodeSearch, setNodeSearch] = useState('')
   const [uploadTargetPath, setUploadTargetPath] = useState('/mods')
   const [selectedUploadServers, setSelectedUploadServers] = useState([])
+  const [selectedRestartServers, setSelectedRestartServers] = useState([])
   const [currentFilePath, setCurrentFilePath] = useState('')
   const [fileEntries, setFileEntries] = useState([])
   const [isFileBrowserLoading, setIsFileBrowserLoading] = useState(false)
@@ -450,6 +451,10 @@ function App() {
           const validIds = new Set(nextGroups.flatMap((group) => group.servers.map((serverItem) => serverItem.id)))
           const filteredServers = currentServers.filter((serverId) => validIds.has(serverId))
           return filteredServers.length ? filteredServers : nextGroups[0]?.servers.slice(0, 2).map((serverItem) => serverItem.id) ?? []
+        })
+        setSelectedRestartServers((currentServers) => {
+          const validIds = new Set(nextGroups.flatMap((group) => group.servers.map((serverItem) => serverItem.id)))
+          return currentServers.filter((serverId) => validIds.has(serverId))
         })
       } catch {
         if (isMounted) setHostGroups(emptyGroups)
@@ -614,6 +619,7 @@ function App() {
     setActiveHostId(hostId)
     setActiveServerId(nextHost?.servers[0]?.id ?? null)
     setSelectedUploadServers(nextHost?.servers.slice(0, 2).map((serverItem) => serverItem.id) ?? [])
+    setSelectedRestartServers([])
     setCurrentFilePath('')
     setFileEntries([])
     setOpenedFile(null)
@@ -635,6 +641,14 @@ function App() {
       currentServers.includes(serverId)
         ? currentServers.filter((currentServerId) => currentServerId !== serverId)
       : [...currentServers, serverId],
+    )
+  }, [])
+
+  const toggleRestartServer = useCallback((serverId) => {
+    setSelectedRestartServers((currentServers) =>
+      currentServers.includes(serverId)
+        ? currentServers.filter((currentServerId) => currentServerId !== serverId)
+        : [...currentServers, serverId],
     )
   }, [])
 
@@ -826,21 +840,56 @@ function App() {
             </section>
           )}
           <div className="topbar-actions">
-            <label className="search-box">
-              <Search size={18} />
-              <input placeholder="Buscar" />
-            </label>
-            <button
-              className="icon-button"
-              type="button"
-              aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo noche'}
-              onClick={() => setTheme((currentTheme) => (currentTheme === 'dark' ? 'light' : 'dark'))}
-            >
-              {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
-            </button>
-            <button className="icon-button" type="button" aria-label="Historial">
-              <History size={19} />
-            </button>
+            <div className="topbar-action-row">
+              <label className="search-box">
+                <Search size={18} />
+                <input placeholder="Buscar" />
+              </label>
+              <button
+                className="icon-button"
+                type="button"
+                aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo noche'}
+                onClick={() => setTheme((currentTheme) => (currentTheme === 'dark' ? 'light' : 'dark'))}
+              >
+                {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
+              </button>
+              <button className="icon-button" type="button" aria-label="Historial">
+                <History size={19} />
+              </button>
+            </div>
+
+            <section className="bulk-restart-card" aria-label="Reinicio multiple">
+              <div className="bulk-restart-summary">
+                <RefreshCw size={16} />
+                <div>
+                  <strong>Reinicio multiple</strong>
+                  <span>{selectedRestartServers.length} seleccionados</span>
+                </div>
+                <button
+                  className="soft-button"
+                  type="button"
+                  disabled={!selectedRestartServers.length}
+                >
+                  Reiniciar
+                </button>
+              </div>
+              <div className="bulk-restart-list">
+                {activeHost.servers.length ? (
+                  activeHost.servers.map((serverItem) => (
+                    <label key={serverItem.id}>
+                      <input
+                        checked={selectedRestartServers.includes(serverItem.id)}
+                        onChange={() => toggleRestartServer(serverItem.id)}
+                        type="checkbox"
+                      />
+                      <span>{serverItem.name}</span>
+                    </label>
+                  ))
+                ) : (
+                  <span>Sin servidores disponibles</span>
+                )}
+              </div>
+            </section>
           </div>
         </header>
 
